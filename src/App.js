@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getDocs, collection, addDoc } from "@firebase/firestore";
+import { getDocs, collection, addDoc, doc, updateDoc } from "@firebase/firestore";
 import './App.css';
 import {db} from "./firebase-config";
 
@@ -13,6 +13,11 @@ function App() {
       name: e.target.name.value,
       age: Number(e.target.age.value)
     });
+  }
+
+  const updateUser = async (id, age) => {
+    const userDoc = doc(db, "users", id);
+    await updateDoc(userDoc, {age: age+1})
   }
 
   useEffect(() => {
@@ -45,7 +50,10 @@ function App() {
               <div className="card-body">
                   <h2>{name}</h2>
                   <h4>{age} years</h4>
-                  <button className="btn btn-primary btn-block">ADD TO CART</button>
+                  <button 
+                    className="btn btn-primary btn-block"
+                    onClick={() => updateUser(id, age)}
+                  >Increase Age</button>
               </div>
             </div>
           ))
