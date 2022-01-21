@@ -1,11 +1,19 @@
 import { useEffect, useState } from 'react';
-import { getDocs, collection } from "@firebase/firestore";
+import { getDocs, collection, addDoc } from "@firebase/firestore";
 import './App.css';
 import {db} from "./firebase-config";
 
 function App() {
   const [users, setUsers] = useState([]);
   const usersCollectionRef = collection(db, "users");
+
+  const createUser = async (e) => {
+    e.preventDefault();
+    await addDoc(usersCollectionRef, {
+      name: e.target.name.value,
+      age: Number(e.target.age.value)
+    });
+  }
 
   useEffect(() => {
     (async () => {
@@ -24,6 +32,11 @@ function App() {
           <span className="nav-link">Services</span>
         </div>
       </nav>
+      <form onSubmit={(e) => createUser(e)} className='m-1'>
+        <input type="text" className="input" name="name" placeholder="Enter Name" />
+        <input type="number" className="input mx-1" name="age" placeholder="Enter Age" />
+        <button type='submit' className='btn btn-primary' >Create User</button>
+      </form>
       <main>
         {
           users.map(({id, name, age}) => (
