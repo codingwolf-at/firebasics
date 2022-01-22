@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react';
-import { getDocs, collection, addDoc, doc, updateDoc, deleteDoc } from "@firebase/firestore";
+import { onSnapshot, addDoc, doc, updateDoc, deleteDoc } from "@firebase/firestore";
 import './App.css';
-import {db} from "./firebase-config";
+import {db, usersCollectionRef} from "./firebase-config";
 
 function App() {
   const [users, setUsers] = useState([]);
-  const usersCollectionRef = collection(db, "users");
 
   const createUser = async (e) => {
     e.preventDefault();
@@ -13,6 +12,7 @@ function App() {
       name: e.target.name.value,
       age: Number(e.target.age.value)
     });
+    e.target.reset();
   }
 
   const updateUser = async (id, age) => {
@@ -26,11 +26,18 @@ function App() {
   }
 
   useEffect(() => {
-    (async () => {
-      const data = await getDocs(usersCollectionRef);
-      setUsers(data.docs.map(doc => ({...doc.data(), id: doc.id})));
-    })();
-  }, [usersCollectionRef])
+    const unSubscribe = onSnapshot(
+      usersCollectionRef,
+      (snapshot) => {
+        setUsers(snapshot.docs.map(doc => ({...doc.data(), id: doc.id})));
+      }, 
+      (error) => {
+        console.log(error);
+      }
+    );
+
+    return () => unSubscribe();
+  }, [])
 
   return (
     <div className="App">
